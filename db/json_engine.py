@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import json
+# import json
 
 # make overloading method, turn into a class
 def newSimpleJS(name = 'nullname', username = '@usernameTest', city = 'DC', bio = 'empty bio'):
