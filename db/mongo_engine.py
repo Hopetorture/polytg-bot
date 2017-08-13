@@ -23,7 +23,8 @@ class mongo:
         query['username'] = json['username']
         if self.collection.find(query).count() > 0:
             print('more then one document with that username')
-            return False  # already have a document!
+            self.collection.replace_one(query, json)
+            return False  # already have a document! # todo: think  about replacement logic later
         self.collection.insert_one(json)
         return True  # implement exit statuses?
 
@@ -49,10 +50,13 @@ class mongo:
     def find_by_username(self, username):
         query = {}
         query['username'] = username
+        print(query)
         cursor = self.collection.find(query)
-        if cursor.count() > 0:
-            return cursor[0]  # finds 1st -> might lead to bugs later
+        ct = cursor.count()
+        if ct > 0: # do I even need this if-else?
+            return dict(cursor[0])  # finds 1st -> might lead to bugs later
         else:
+            print('returning an empty dict from db!')
             return {}  # empty dict == False
             # raise error? placeholder error object?
 
