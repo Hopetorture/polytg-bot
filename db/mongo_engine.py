@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from pymongo import MongoClient
-
+from pymongo import CursorType
 
 class mongo:
 
@@ -46,6 +46,12 @@ class mongo:
         query['username'] = username
         self.collection.replace_one(query, json)
         # NOT TESTED.
+
+    def find_by_city(self, city):
+        query = {}
+        query['city'] = city
+        return self.collection.find(query)
+
 
     def find_by_username(self, username):
         query = {}
