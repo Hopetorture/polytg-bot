@@ -164,7 +164,12 @@ def get_user_city(bot, update):
 
         userinfo = user_search_state[username]
         userinfo['cursor'] = result
-        update.message.reply_text(pretty_data(result.next()))
+        foundList = list()
+        for s in result:
+            foundList.append(s)
+
+        update.message.reply_text(pretty_data(foundList.pop()))
+        user_search_state[username]['iterator'] = foundList
 
 
         # print(result, ' result in city method')
@@ -190,18 +195,23 @@ def get_next_users(bot, update):
         del user_search_state[username]
         return ConversationHandler.END
 
-    reply_keyboard = [['stop', 'next']]
-    update.message.reply_text('whattodo',
-                              reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+
 
 #    print(user_search_state, 'user search state')
     # в конец?
 #    print(response)
  #   if response == 'next':
  #       print(11)
-    cursor = user_search_state[username]['cursor']
-    if cursor.hasNext(): # test hasNext
-        update.message.reply_text(pretty_data(cursor.next()))
+    foundList = user_search_state[username]['iterator']
+
+    if foundList: # test hasNext
+        print(len(foundList), ' len')
+        resp = pretty_data(foundList.pop())
+        #foundList.remove(foundList[0])
+        # print(resp, " resp")
+        reply_keyboard = [['stop', 'next']]
+        update.message.reply_text(resp,
+                                  reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
         return NEXT
     else:
         update.message.reply_text('Всё, остальные уехали в Москву!')
