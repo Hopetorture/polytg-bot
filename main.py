@@ -45,7 +45,7 @@ def addme(bot, update):
     userinfo['username'] = username
     users_cache[username] = userinfo
     update.message.reply_text('Привет! Как тебя зовут?(Для отмены регистрации введи /cancel , а для того, что бы начать '
-                              'всё заного - /startover)')
+                              'всё заново - /startover)')
     # name = update.message.text
     # print(name)
     return NAME
@@ -241,6 +241,13 @@ def get_next_users(bot, update):
 def stop_search(bot, update):
     return ConversationHandler.END
 
+def help(bot, update):
+    info = 'Интерфейс бота:\n' \
+           '/addme - добавить себя в список анкет. Лучше писть в ЛС боту \n' \
+           '/whois @username - поиск анкет по юзернейму \n' \
+           '/help - это сообщение \n' \
+           '/find - поиск анкет по городу. Не чувствительно к регистру. Прка не умею в англ. названия, списки и аббревиатуры.'
+    update.message.reply_text(info)
 
 def main():
     with open('/home/gss/python/polytg-bot/token')as f:
@@ -289,6 +296,7 @@ def main():
     dp.add_handler(addme_handler)
     dp.add_handler(CommandHandler('echo', echo))
     dp.add_handler(CommandHandler('whois', whois))
+    dp.add_handler(CommandHandler('help', help))
     updater.start_polling()
     updater.idle()
 
