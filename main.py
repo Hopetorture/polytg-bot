@@ -138,68 +138,75 @@ def find_users(bot, update):
 def get_user_city(bot, update):
     city = update.message.text.strip().replace('{', '').replace('}', '').replace(']', '').replace('[', '').lower()
     username = update.message.from_user['username']
-    print(1)
-    # reply_keyboard = [['stop', 'next']]
-    # update.message.reply_text('get_user_city',reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+    # print(1)
+    reply_keyboard = [['stop', 'next']]
+    update.message.reply_text('get_user_city',reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
 
     user_search_state[username] = {}
     user_search_state[username]['city'] = city
-    print(2)
+    # print(2)
     db = mongo_engine.mongo()
     result = db.find_by_city(city)
-    print(3)
+    # print(3)
     print(result.count(), 'count')
     if result.count() > 0:
-
-        print(4)
-
-        fucking_list = list()
-        for e in result:
-            fucking_list.append(e)
+        # print(4)
+        ##fucking_list = list()
+        ##for e in result:
+            ##fucking_list.append(e)
 
         # print(fucking_list, ' fucking list')
         # cnt = 0
-        for elem in fucking_list:
+        ##for elem in fucking_list:
             # cnt += 1
             # print (pretty_data(elem))
-            update.message.reply_text(pretty_data(elem))
+            ##update.message.reply_text(pretty_data(elem))
 
-            print ('out')
-        # for
-    return ConversationHandler.END
-        # userinfo = user_search_state[username]
-        # userinfo['cursor'] = result
+        userinfo = user_search_state[username]
+        userinfo['cursor'] = result
+        update.message.reply_text(pretty_data(result.next()))
+
+
         # print(result, ' result in city method')
         # print(userinfo)
         # for e in result:
         #    print ('out')
          #   update.message.reply_text('out')
           #  update.message.reply_text(pretty_data(e))
-        # return NEXT
-    #else:
-    #    print(5)
-    #   update.message.reply_text('В таком городе никого не нашель!')
-    #    del user_search_state[username]
-    #    return ConversationHandler.END
+        return NEXT
+    else:
+        print(5)
+        update.message.reply_text('В таком городе никого не нашель!')
+        del user_search_state[username]
+        return ConversationHandler.END
 
 
 def get_next_users(bot, update):
-    pass
-#    print (5.1)
-#    response = str(update.message.text).strip().replace('{', '').replace('}', '').replace(']', '').replace('[', '').lower()
-#    username = update.message.from_user['username']
+    response = str(update.message.text).strip().replace('{', '').replace('}', '').replace(']', '').replace('[', '').lower()
+    username = update.message.from_user['username']
 #    print(response + 'response in get_next_users')
+    if 'stop' in response:
+        print('search stopped')
+        del user_search_state[username]
+        return ConversationHandler.END
 
-#    reply_keyboard = [['stop', 'next']]
-#    update.message.reply_text('whattodo',
-#                              reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+    reply_keyboard = [['stop', 'next']]
+    update.message.reply_text('whattodo',
+                              reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
 
 #    print(user_search_state, 'user search state')
     # в конец?
 #    print(response)
  #   if response == 'next':
  #       print(11)
- #       cursor = user_search_state[username]['cursor']
+    cursor = user_search_state[username]['cursor']
+    if cursor.hasNext(): # test hasNext
+        update.message.reply_text(pretty_data(cursor.next()))
+        return NEXT
+    else:
+        update.message.reply_text('Всё, остальные уехали в Москву!')
+        del user_search_state[username]
+        return ConversationHandler.END
   #      print(user_search_state[username]['cursor'])
    #     print(11.05)
     #    print('coursor count: ')
