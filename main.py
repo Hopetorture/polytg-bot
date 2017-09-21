@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+import time
+
 from db import mongo_engine
 from db import json_engine as je
 
@@ -34,12 +36,20 @@ def echo(bot, update):
     # update.message.reply_text(str(count_))
     # count_ += 1
     # update.message.reply_text(update.message.text)
-    print (update.message.chat_id)
+    type = update.message.chat['type']
+    # print (msg)
+    print (type)
+    print ('called')
     chatid = update.message.chat_id
     bot.sendMessage(chatid, text='test')
 
 
+
 def addme(bot, update):
+    chat_type = update.message.chat['type']
+    if chat_type != 'private':
+        return ConversationHandler.END
+
     username = update.message.from_user['username']
     userinfo = {}
     userinfo['username'] = username
@@ -123,6 +133,16 @@ def cancel_addme(bot, update):
 
 
 def whois(bot, update):
+    chat_type = update.message.chat['type']
+    if chat_type != 'private':
+        return
+
+    username = update.message.from_user
+    user_exists = mongo_engine.mongo.entry_exists(username)
+    if not user_exists:
+        update.message.reply_text('Сперва расскажи нам о себе! :3')
+        return ConversationHandler.END
+
     findname = str(update.message.text)
     findname = findname.replace('@', '').replace('/whois', '').strip()
     db = mongo_engine.mongo()
@@ -131,16 +151,30 @@ def whois(bot, update):
 
 
 def find_users(bot, update):
-    # reply_keyboard = [['Male', 'Female', 'Other']]
+    print ('called find')
+    chat_type = update.message.chat['type']
+    if chat_type != 'private':
+        return ConversationHandler.END
+
+    #update.message.reply_text('test')
+    username = update.message.from_user['username']
+    user_exists = mongo_engine.mongo().entry_exists(username)
+    print (user_exists)
+    if not user_exists: # user_exists:
+        print ('if entered')
+        update.message.reply_text('Сперва расскажи нам о себе! :3 (/addme)')
+        return ConversationHandler.END
+
     update.message.reply_text('В каком городе будем искать?')
-    return  USERCITY
+    return USERCITY
+
 
 def get_user_city(bot, update):
     city = update.message.text.strip().replace('{', '').replace('}', '').replace(']', '').replace('[', '').lower()
     username = update.message.from_user['username']
     # print(1)
-    reply_keyboard = [['stop', 'next']]
-    update.message.reply_text('get_user_city',reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+    # reply_keyboard = [['stop', 'next']]
+    # update.message.reply_text('', reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
 
     user_search_state[username] = {}
     user_search_state[username]['city'] = city
@@ -150,34 +184,18 @@ def get_user_city(bot, update):
     # print(3)
     print(result.count(), 'count')
     if result.count() > 0:
-        # print(4)
-        ##fucking_list = list()
-        ##for e in result:
-            ##fucking_list.append(e)
-
-        # print(fucking_list, ' fucking list')
-        # cnt = 0
-        ##for elem in fucking_list:
-            # cnt += 1
-            # print (pretty_data(elem))
-            ##update.message.reply_text(pretty_data(elem))
-
+        reply_keyboard = [['stop', 'next']]
+        update.message.reply_text('', reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
+        
         userinfo = user_search_state[username]
         userinfo['cursor'] = result
         foundList = list()
+
         for s in result:
             foundList.append(s)
 
         update.message.reply_text(pretty_data(foundList.pop()))
         user_search_state[username]['iterator'] = foundList
-
-
-        # print(result, ' result in city method')
-        # print(userinfo)
-        # for e in result:
-        #    print ('out')
-         #   update.message.reply_text('out')
-          #  update.message.reply_text(pretty_data(e))
         return NEXT
     else:
         print(5)
@@ -275,6 +293,7 @@ def main():
     dp = updater.dispatcher
     # dp.add_handler(CommandHandler("addme", addme))
     # dp.add_handler(MessageHandler(Filters.text, echo))
+    # mvar = mongo_engine.mongo().entry_exists('justanotheruser69')
 
     addme_handler = ConversationHandler(
         entry_points=[CommandHandler('addme', addme)],

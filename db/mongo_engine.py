@@ -29,12 +29,17 @@ class mongo:
         return True  # implement exit statuses?
 
     def entry_exists(self, username):
+        print ('entering entry exists')
         query = {}
         query['username'] = username
+        print ('before if-else')
         if self.collection.find(query).count() > 0:
+            print('True')
             return True
         else:
+            print ('False')
             return False
+
 
     def remove_by_username(self, username):
         query = {}
